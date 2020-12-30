@@ -1,0 +1,23 @@
+namespace skiter {
+};
+
+interface Sciter {
+    constructor(u32 width, u32 height, u64 hwnd, SciterEvents events);
+    void resize(u32 width, u32 height);
+    void resolution(u32 ppi);
+    void heartbeat();
+    void render();
+    void redraw();
+    void mouse_moved(i32 x, i32 y);
+    void mouse_down(i32 x, i32 y);
+    void mouse_up(i32 x, i32 y);
+    void click(i32 x, i32 y);
+    void call_event(string name, string data);
+    void load_html_string(string html);
+    void load_html_file(string file);
+};
+
+callback interface SciterEvents {
+    void on_redraw_required();
+    void on_event(string name, string data);
+};
