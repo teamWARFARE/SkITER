@@ -44,15 +44,15 @@ open class RustBuffer : Structure() {
 
     companion object {
         internal fun alloc(size: Int = 0) = rustCall(InternalError.ByReference()) { err ->
-            _UniFFILib.INSTANCE.ffi_skiter_388f_rustbuffer_alloc(size, err)
+            _UniFFILib.INSTANCE.ffi_skiter_71b6_rustbuffer_alloc(size, err)
         }
 
         internal fun free(buf: RustBuffer.ByValue) = rustCall(InternalError.ByReference()) { err ->
-            _UniFFILib.INSTANCE.ffi_skiter_388f_rustbuffer_free(buf, err)
+            _UniFFILib.INSTANCE.ffi_skiter_71b6_rustbuffer_free(buf, err)
         }
 
         internal fun reserve(buf: RustBuffer.ByValue, additional: Int) = rustCall(InternalError.ByReference()) { err ->
-            _UniFFILib.INSTANCE.ffi_skiter_388f_rustbuffer_reserve(buf, additional, err)
+            _UniFFILib.INSTANCE.ffi_skiter_71b6_rustbuffer_reserve(buf, additional, err)
         }
     }
 
@@ -235,6 +235,30 @@ internal fun UInt.write(buf: RustBufferBuilder) {
 
 
 
+@ExperimentalUnsignedTypes
+internal fun ULong.Companion.lift(v: Long): ULong {
+    return v.toULong()
+}
+
+@ExperimentalUnsignedTypes
+internal fun ULong.Companion.read(buf: ByteBuffer): ULong {
+    return ULong.lift(buf.getLong())
+}
+
+@ExperimentalUnsignedTypes
+internal fun ULong.lower(): Long {
+    return this.toLong()
+}
+
+@ExperimentalUnsignedTypes
+internal fun ULong.write(buf: RustBufferBuilder) {
+    buf.putLong(this.toLong())
+}
+
+
+
+
+
 internal fun String.Companion.lift(rbuf: RustBuffer.ByValue): String {
     try {
         val byteArr = ByteArray(rbuf.len)
@@ -272,30 +296,6 @@ internal fun String.write(buf: RustBufferBuilder) {
 
 
 
-
-
-
-
-
-@ExperimentalUnsignedTypes
-internal fun ULong.Companion.lift(v: Long): ULong {
-    return v.toULong()
-}
-
-@ExperimentalUnsignedTypes
-internal fun ULong.Companion.read(buf: ByteBuffer): ULong {
-    return ULong.lift(buf.getLong())
-}
-
-@ExperimentalUnsignedTypes
-internal fun ULong.lower(): Long {
-    return this.toLong()
-}
-
-@ExperimentalUnsignedTypes
-internal fun ULong.write(buf: RustBufferBuilder) {
-    buf.putLong(this.toLong())
-}
 
 
 
@@ -355,83 +355,87 @@ internal interface _UniFFILib : Library {
         }
     }
 
-    fun ffi_skiter_388f_Sciter_object_free(handle: Long
+    fun ffi_skiter_71b6_Sciter_object_free(handle: Long
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_new(width: Int,height: Int,hwnd: Long,events: Long
+    fun skiter_71b6_Sciter_new(width: Int,height: Int,hwnd: Long,events: Long
     , uniffi_out_err: Structure.ByReference
     ): Long
 
-    fun skiter_388f_Sciter_resize(handle: Long,width: Int,height: Int
+    fun skiter_71b6_Sciter_resize(handle: Long,width: Int,height: Int
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_resolution(handle: Long,ppi: Int
+    fun skiter_71b6_Sciter_resolution(handle: Long,ppi: Int
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_heartbeat(handle: Long
+    fun skiter_71b6_Sciter_heartbeat(handle: Long
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_render(handle: Long
+    fun skiter_71b6_Sciter_render(handle: Long
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_redraw(handle: Long
+    fun skiter_71b6_Sciter_redraw(handle: Long
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_mouse_moved(handle: Long,x: Int,y: Int
+    fun skiter_71b6_Sciter_mouse_moved(handle: Long,x: Int,y: Int
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_mouse_down(handle: Long,x: Int,y: Int
+    fun skiter_71b6_Sciter_mouse_down(handle: Long,x: Int,y: Int
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_mouse_up(handle: Long,x: Int,y: Int
+    fun skiter_71b6_Sciter_mouse_up(handle: Long,x: Int,y: Int
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_click(handle: Long,x: Int,y: Int
+    fun skiter_71b6_Sciter_click(handle: Long,x: Int,y: Int
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_call_event(handle: Long,name: RustBuffer.ByValue,data: RustBuffer.ByValue
+    fun skiter_71b6_Sciter_call_event(handle: Long,name: RustBuffer.ByValue,data: RustBuffer.ByValue
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_load_html_string(handle: Long,html: RustBuffer.ByValue
+    fun skiter_71b6_Sciter_load_html_string(handle: Long,html: RustBuffer.ByValue
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun skiter_388f_Sciter_load_html_file(handle: Long,file: RustBuffer.ByValue
+    fun skiter_71b6_Sciter_load_html_file(handle: Long,file: RustBuffer.ByValue
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun ffi_skiter_388f_SciterEvents_init_callback(callback_stub: ForeignCallback
+    fun skiter_71b6_Sciter_data_ready(handle: Long,uri: RustBuffer.ByValue,request_id: Long,data: RustBuffer.ByValue
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun ffi_skiter_388f_rustbuffer_alloc(size: Int
+    fun ffi_skiter_71b6_SciterEvents_init_callback(callback_stub: ForeignCallback
+    , uniffi_out_err: Structure.ByReference
+    ): Unit
+
+    fun ffi_skiter_71b6_rustbuffer_alloc(size: Int
     , uniffi_out_err: Structure.ByReference
     ): RustBuffer.ByValue
 
-    fun ffi_skiter_388f_rustbuffer_from_bytes(bytes: ForeignBytes.ByValue
+    fun ffi_skiter_71b6_rustbuffer_from_bytes(bytes: ForeignBytes.ByValue
     , uniffi_out_err: Structure.ByReference
     ): RustBuffer.ByValue
 
-    fun ffi_skiter_388f_rustbuffer_free(buf: RustBuffer.ByValue
+    fun ffi_skiter_71b6_rustbuffer_free(buf: RustBuffer.ByValue
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
-    fun ffi_skiter_388f_rustbuffer_reserve(buf: RustBuffer.ByValue,additional: Int
+    fun ffi_skiter_71b6_rustbuffer_reserve(buf: RustBuffer.ByValue,additional: Int
     , uniffi_out_err: Structure.ByReference
     ): RustBuffer.ByValue
 
-    fun ffi_skiter_388f_string_free(cstr: Pointer
+    fun ffi_skiter_71b6_string_free(cstr: Pointer
     , uniffi_out_err: Structure.ByReference
     ): Unit
 
@@ -582,7 +586,7 @@ internal open class RustError : Structure() {
     fun ensureConsumed() {
         if (this.message != null) {
             rustCall(InternalError.ByReference()) { err ->
-                _UniFFILib.INSTANCE.ffi_skiter_388f_string_free(this.message!!, err)
+                _UniFFILib.INSTANCE.ffi_skiter_71b6_string_free(this.message!!, err)
              }
             this.message = null
         }
@@ -680,6 +684,7 @@ public interface SciterInterface {
     fun callEvent(name: String, data: String )
     fun loadHtmlString(html: String )
     fun loadHtmlFile(file: String )
+    fun dataReady(uri: String, requestId: ULong, data: String )
     
 }
 
@@ -690,7 +695,7 @@ class Sciter(
         this(rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_new(width.lower(), height.lower(), hwnd.lower(), CallbackInterfaceSciterEventsInternals.lower(events) ,err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_new(width.lower(), height.lower(), hwnd.lower(), CallbackInterfaceSciterEventsInternals.lower(events) ,err)
 })
 
     /**
@@ -706,7 +711,7 @@ class Sciter(
             callWithHandle {
                 super.destroy() // poison the handle so no-one else can use it before we tell rust.
                 rustCall(InternalError.ByReference()) { err ->
-                    _UniFFILib.INSTANCE.ffi_skiter_388f_Sciter_object_free(it, err)
+                    _UniFFILib.INSTANCE.ffi_skiter_71b6_Sciter_object_free(it, err)
                 }
             }
         } catch (e: IllegalStateException) {
@@ -719,7 +724,7 @@ class Sciter(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_resize(it, width.lower(), height.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_resize(it, width.lower(), height.lower() , err)
 } 
         }
     
@@ -728,7 +733,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_resolution(it, ppi.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_resolution(it, ppi.lower() , err)
 } 
         }
     
@@ -737,7 +742,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_heartbeat(it,  err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_heartbeat(it,  err)
 } 
         }
     
@@ -746,7 +751,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_render(it,  err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_render(it,  err)
 } 
         }
     
@@ -755,7 +760,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_redraw(it,  err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_redraw(it,  err)
 } 
         }
     
@@ -764,7 +769,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_mouse_moved(it, x.lower(), y.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_mouse_moved(it, x.lower(), y.lower() , err)
 } 
         }
     
@@ -773,7 +778,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_mouse_down(it, x.lower(), y.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_mouse_down(it, x.lower(), y.lower() , err)
 } 
         }
     
@@ -782,7 +787,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_mouse_up(it, x.lower(), y.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_mouse_up(it, x.lower(), y.lower() , err)
 } 
         }
     
@@ -791,7 +796,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_click(it, x.lower(), y.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_click(it, x.lower(), y.lower() , err)
 } 
         }
     
@@ -800,7 +805,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_call_event(it, name.lower(), data.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_call_event(it, name.lower(), data.lower() , err)
 } 
         }
     
@@ -809,7 +814,7 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_load_html_string(it, html.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_load_html_string(it, html.lower() , err)
 } 
         }
     
@@ -818,7 +823,16 @@ rustCall(
 rustCall(
     InternalError.ByReference()
 ) { err ->
-    _UniFFILib.INSTANCE.skiter_388f_Sciter_load_html_file(it, file.lower() , err)
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_load_html_file(it, file.lower() , err)
+} 
+        }
+    
+    override fun dataReady(uri: String, requestId: ULong, data: String ) =
+        callWithHandle {
+rustCall(
+    InternalError.ByReference()
+) { err ->
+    _UniFFILib.INSTANCE.skiter_71b6_Sciter_data_ready(it, uri.lower(), requestId.lower(), data.lower() , err)
 } 
         }
     
@@ -832,6 +846,7 @@ rustCall(
 public interface SciterEvents {
     fun onRedrawRequired()
     fun onEvent(name: String, data: String )
+    fun onLoadResource(uri: String, requestId: ULong )
     
 }
 
@@ -844,6 +859,7 @@ internal class CallbackInterfaceSciterEventsFFI : ForeignCallback {
                 IDX_CALLBACK_FREE -> CallbackInterfaceSciterEventsInternals.drop(handle)
                 1 -> this.invokeOnRedrawRequired(cb, args)
                 2 -> this.invokeOnEvent(cb, args)
+                3 -> this.invokeOnLoadResource(cb, args)
                 
                 else -> RustBuffer.ByValue()
             }
@@ -874,6 +890,19 @@ internal class CallbackInterfaceSciterEventsFFI : ForeignCallback {
         }
 
     
+    private fun invokeOnLoadResource(kotlinCallbackInterface: SciterEvents, args: RustBuffer.ByValue): RustBuffer.ByValue =
+        try {
+            val buf = args.asByteBuffer() ?: throw InternalError("No ByteBuffer in RustBuffer; this is a Uniffi bug")
+            kotlinCallbackInterface.onLoadResource(
+                    String.read(buf), 
+                    ULong.read(buf) 
+                    )
+            .let { RustBuffer.ByValue() }
+                } finally {
+            RustBuffer.free(args)
+        }
+
+    
 }
 
 internal object CallbackInterfaceSciterEventsInternals: CallbackInternals<SciterEvents>(
@@ -881,7 +910,7 @@ internal object CallbackInterfaceSciterEventsInternals: CallbackInternals<Sciter
 ) {
     override fun register(lib: _UniFFILib) {
         rustCall(InternalError.ByReference()) { err ->
-            lib.ffi_skiter_388f_SciterEvents_init_callback(this.foreignCallback, err)
+            lib.ffi_skiter_71b6_SciterEvents_init_callback(this.foreignCallback, err)
         }
     }
 }

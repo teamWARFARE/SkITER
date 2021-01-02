@@ -15,9 +15,11 @@ interface Sciter {
     void call_event(string name, string data);
     void load_html_string(string html);
     void load_html_file(string file);
+    void data_ready(string uri, u64 request_id, string data);
 };
 
 callback interface SciterEvents {
     void on_redraw_required();
     void on_event(string name, string data);
+    void on_load_resource(string uri, u64 request_id);
 };

@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use sciter::dispatch_script_call;
 use sciter::host::{OUTPUT_SEVERITY, OUTPUT_SUBSYTEMS};
-use sciter::types::{POINT, SCN_INVALIDATE_RECT, _HWINDOW};
+use sciter::types::{LOAD_RESULT, POINT, SCN_INVALIDATE_RECT, SCN_LOAD_DATA, _HWINDOW};
 use sciter::windowless::{
     handle_message, Message, MouseEvent, PaintLayer, KEYBOARD_STATES, MOUSE_BUTTONS, MOUSE_EVENTS,
 };
@@ -166,6 +166,15 @@ impl Sciter {
     pub fn load_html_file(&mut self, file: String) {
         self.host.load_file(&file);
     }
+
+    pub fn data_ready(&self, uri: String, request_id: u64, data: String) {
+        println!("went through");
+        let data = base64::decode(data).unwrap();
+        println!("decoded");
+        self.host
+            .data_ready_async(&uri, &data, Some(request_id as _));
+    }
+
     fn create(hwnd: &mut SciterHandle) {
         handle_message(
             hwnd.raw(),
@@ -237,6 +246,17 @@ impl sciter::EventHandler for EventHandler {
 struct HostHandler(Rc<dyn SciterEvents>);
 
 impl sciter::HostHandler for HostHandler {
+    fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> Option<LOAD_RESULT> {
+        let uri = sciter::utf::w2s(pnm.uri);
+
+        return if !uri.starts_with("sciter:") {
+            self.0.on_load_resource(uri.clone(), pnm.request_id as u64);
+            Some(LOAD_RESULT::LOAD_DELAYED)
+        } else {
+            None
+        };
+    }
+
     fn on_graphics_critical_failure(&mut self) {
         println!("Critical graphics failure");
     }
@@ -258,6 +278,7 @@ impl sciter::HostHandler for HostHandler {
 pub trait SciterEvents {
     fn on_redraw_required(&self);
     fn on_event(&self, name: String, data: String);
+    fn on_load_resource(&self, uri: String, request_id: u64);
 }
 
 include!(concat!(env!("OUT_DIR"), "/skiter.uniffi.rs"));

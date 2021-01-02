@@ -15,6 +15,7 @@ anyhow = "1.0.37"
 tempfile = "3.1.0"
 zstd = "0.5.1"
 uniffi = { path = "vendored/uniffi" }
+base64 = "0.13.0"
 
 [build-dependencies]
-uniffi_build = { path = "vendored/uniffi_build" }
+uniffi_build = { path = "vendored/uniffi_build", features = ["builtin-bindgen"] }
