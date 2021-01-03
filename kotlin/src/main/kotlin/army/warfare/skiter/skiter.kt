@@ -212,30 +212,6 @@ internal fun<T> lowerIntoRustBuffer(v: T, writeItem: (T, RustBufferBuilder) -> U
 
 
 @ExperimentalUnsignedTypes
-internal fun UInt.Companion.lift(v: Int): UInt {
-    return v.toUInt()
-}
-
-@ExperimentalUnsignedTypes
-internal fun UInt.Companion.read(buf: ByteBuffer): UInt {
-    return UInt.lift(buf.getInt())
-}
-
-@ExperimentalUnsignedTypes
-internal fun UInt.lower(): Int {
-    return this.toInt()
-}
-
-@ExperimentalUnsignedTypes
-internal fun UInt.write(buf: RustBufferBuilder) {
-    buf.putInt(this.toInt())
-}
-
-
-
-
-
-@ExperimentalUnsignedTypes
 internal fun ULong.Companion.lift(v: Long): ULong {
     return v.toULong()
 }
@@ -253,6 +229,56 @@ internal fun ULong.lower(): Long {
 @ExperimentalUnsignedTypes
 internal fun ULong.write(buf: RustBufferBuilder) {
     buf.putLong(this.toLong())
+}
+
+
+
+
+
+internal fun Int.Companion.lift(v: Int): Int {
+    return v
+}
+
+internal fun Int.Companion.read(buf: ByteBuffer): Int {
+    return buf.getInt()
+}
+
+internal fun Int.lower(): Int {
+    return this
+}
+
+internal fun Int.write(buf: RustBufferBuilder) {
+    buf.putInt(this)
+}
+
+
+
+
+
+
+
+
+
+
+
+@ExperimentalUnsignedTypes
+internal fun UInt.Companion.lift(v: Int): UInt {
+    return v.toUInt()
+}
+
+@ExperimentalUnsignedTypes
+internal fun UInt.Companion.read(buf: ByteBuffer): UInt {
+    return UInt.lift(buf.getInt())
+}
+
+@ExperimentalUnsignedTypes
+internal fun UInt.lower(): Int {
+    return this.toInt()
+}
+
+@ExperimentalUnsignedTypes
+internal fun UInt.write(buf: RustBufferBuilder) {
+    buf.putInt(this.toInt())
 }
 
 
@@ -289,32 +315,6 @@ internal fun String.write(buf: RustBufferBuilder) {
     val byteArr = this.toByteArray(Charsets.UTF_8)
     buf.putInt(byteArr.size)
     buf.put(byteArr)
-}
-
-
-
-
-
-
-
-
-
-
-
-internal fun Int.Companion.lift(v: Int): Int {
-    return v
-}
-
-internal fun Int.Companion.read(buf: ByteBuffer): Int {
-    return buf.getInt()
-}
-
-internal fun Int.lower(): Int {
-    return this
-}
-
-internal fun Int.write(buf: RustBufferBuilder) {
-    buf.putInt(this)
 }
 
 

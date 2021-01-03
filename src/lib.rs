@@ -206,8 +206,11 @@ fn load_sciter() -> anyhow::Result<()> {
         }
     }
 
-    // Read compressed sciter library
+    #[cfg(target_os = "linux")]
     let sciter = include_bytes!("../resources/libsciter.so.zs");
+
+    #[cfg(target_os = "windows")]
+    let sciter = include_bytes!("../resources/sciter.dll.zs");
 
     // Write decompressed sciter library to temporary file
     let tmp_dir = tempfile::Builder::new().prefix("sciter").tempdir()?;
