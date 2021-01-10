@@ -1,0 +1,27 @@
+use super::{Sciter, SciterCallbacks};
+
+use jni_sys::*;
+
+foreign_callback!(callback SciterCallbacks {
+    self_type SciterCallbacks;
+    onRedrawRequired = SciterCallbacks::on_redraw_required(&self);
+    onEvent = SciterCallbacks::on_event(&self, name: String, data: String);
+});
+
+foreign_class!(class Sciter {
+    self_type Sciter;
+    constructor Sciter::new(width: u32, height: u32, hwnd: u64, callbacks: Box<dyn SciterCallbacks>) -> Result<Sciter, &'static str>;
+    fn Sciter::resize(&mut self, width: u32, height: u32);
+    fn Sciter::heartbeat(&mut self);
+    fn Sciter::render(&mut self) -> Result<(), &'static str>;
+    fn Sciter::redraw(&mut self);
+    fn Sciter::mouse_moved(&mut self, x: i32, y: i32);
+    fn Sciter::mouse_down(&mut self, x: i32, y: i32);
+    fn Sciter::mouse_up(&mut self, x: i32, y: i32);
+    fn Sciter::click(&mut self, x: i32, y: i32);
+    fn Sciter::load_html_string(&mut self, html: &str);
+    fn Sciter::load_html_file(&mut self, path: &str);
+    fn Sciter::call_event(&mut self, name: String, data: String) -> Result<(), &'static str>;
+
+    foreign_code "    static { System.loadLibrary(\"sciter_jni\"); }\n";
+});

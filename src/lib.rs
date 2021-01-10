@@ -3,15 +3,19 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 
+use sciter::dispatch_script_call;
 use sciter::host::{OUTPUT_SEVERITY, OUTPUT_SUBSYTEMS};
-use sciter::types::{LOAD_RESULT, POINT, SCN_INVALIDATE_RECT, SCN_LOAD_DATA, _HWINDOW};
+use sciter::types::{POINT, SCN_INVALIDATE_RECT, _HWINDOW};
 use sciter::windowless::{
     handle_message, Message, MouseEvent, PaintLayer, KEYBOARD_STATES, MOUSE_BUTTONS, MOUSE_EVENTS,
 };
 use sciter::Host;
-use sciter::{dispatch_script_call, GFX_LAYER};
 
 use anyhow::anyhow;
+
+pub use crate::java_glue::*;
+
+mod java_glue;
 
 type SciterHwnd = *mut _HWINDOW;
 
@@ -23,7 +27,7 @@ impl SciterHandle {
     fn raw(&mut self) -> SciterHwnd {
         self.hwnd
     }
-    fn attach(&mut self, callbacks: Rc<dyn SciterEvents>) -> Host {
+    fn attach(&mut self, callbacks: Rc<dyn SciterCallbacks>) -> Host {
         sciter::Host::attach_with(self.raw(), HostHandler(callbacks))
     }
 }
@@ -34,45 +38,44 @@ pub struct Sciter {
     startup: Instant,
 }
 
-unsafe impl Send for Sciter {}
-unsafe impl Sync for Sciter {}
-
 static SCITER_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 impl Sciter {
-    pub fn new(width: u32, height: u32, hwnd: u64, callbacks: Box<dyn SciterEvents>) -> Sciter {
-        let sciter = || -> Result<Sciter, &'static str> {
-            if !SCITER_INITIALIZED.compare_and_swap(false, true, Ordering::Relaxed) {
-                load_sciter().or(Err("Couldn't load sciter native library :("))?;
+    pub fn new(
+        width: u32,
+        height: u32,
+        hwnd: u64,
+        callbacks: Box<dyn SciterCallbacks>,
+    ) -> Result<Sciter, &'static str> {
+        if !SCITER_INITIALIZED.compare_and_swap(false, true, Ordering::Relaxed) {
+            load_sciter().or(Err("Couldn't load sciter native library"))?;
 
-                // Give sciter necessary privileges
-                sciter::set_options(sciter::RuntimeOptions::UxTheming(true)).unwrap();
-                sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
-                sciter::set_options(sciter::RuntimeOptions::ScriptFeatures(0xFF)).unwrap();
-            }
+            // Give sciter necessary privileges
+            sciter::set_options(sciter::RuntimeOptions::UxTheming(true)).unwrap();
+            sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
+            sciter::set_options(sciter::RuntimeOptions::ScriptFeatures(0xFF)).unwrap();
+        }
 
-            let raw_hwnd = hwnd as SciterHwnd;
-            let mut hwnd = SciterHandle { hwnd: raw_hwnd };
+        let raw_hwnd = hwnd as SciterHwnd;
+        let mut hwnd = SciterHandle { hwnd: raw_hwnd };
 
-            Self::create(&mut hwnd);
+        Self::create(&mut hwnd);
 
-            let callbacks: Rc<dyn SciterEvents> = Rc::from(callbacks);
+        let callbacks: Rc<dyn SciterCallbacks> = Rc::from(callbacks);
 
-            let host = hwnd.attach(callbacks.clone());
+        let host = hwnd.attach(callbacks.clone());
 
-            host.attach_handler(EventHandler(callbacks));
+        host.attach_handler(EventHandler(callbacks));
 
-            let mut sciter = Sciter {
-                hwnd,
-                host,
-                startup: Instant::now(),
-            };
-            sciter.resolution(100);
-            sciter.resize(width, height);
-            Ok(sciter)
-        }();
+        let mut sciter = Sciter {
+            hwnd,
+            host,
+            startup: Instant::now(),
+        };
+        // sciter.resolution(100);
+        sciter.resize(width, height);
 
-        sciter.unwrap()
+        Ok(sciter)
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
@@ -91,21 +94,20 @@ impl Sciter {
             },
         );
     }
-    pub fn render(&mut self) {
-        let root = self
-            .host
-            .get_root()
-            .ok_or("Couldn't get document root for rendering")
-            .unwrap()
-            .as_ptr();
-
+    pub fn render(&mut self) -> Result<(), &'static str> {
         handle_message(
             self.hwnd.raw(),
             Message::Paint(PaintLayer {
-                element: root,
+                element: self
+                    .host
+                    .get_root()
+                    .ok_or("Couldn't get document root for rendering")?
+                    .as_ptr(),
                 is_foreground: true,
             }),
         );
+
+        Ok(())
     }
     pub fn redraw(&mut self) {
         handle_message(self.hwnd.raw(), Message::Redraw);
@@ -148,37 +150,27 @@ impl Sciter {
         handle_message(self.hwnd.raw(), Message::Mouse(event));
     }
 
-    pub fn call_event(&mut self, name: String, data: String) {
-        || -> Result<(), &'static str> {
-            self.host
-                .get_root()
-                .ok_or("Couldn't get root")?
-                .call_function("onEvent", &sciter::make_args!(name, data))
-                .or(Err("Couldn't call event"))?;
-            Ok(())
-        }()
-        .unwrap();
+    pub fn call_event(&mut self, name: String, data: String) -> Result<(), &'static str> {
+        self.host
+            .get_root()
+            .ok_or("Couldn't get root")?
+            .call_function("onEvent", &sciter::make_args!(name, data))
+            .or(Err("Couldn't call event"))?;
+        Ok(())
     }
 
-    pub fn load_html_string(&mut self, html: String) {
+    pub fn load_html_string(&mut self, html: &str) {
         self.host.load_html(html.as_bytes(), None);
     }
-    pub fn load_html_file(&mut self, file: String) {
-        self.host.load_file(&file);
+    pub fn load_html_file(&mut self, file: &str) {
+        self.host.load_file(file);
     }
-
-    pub fn data_ready(&self, uri: String, request_id: u64, data: String) {
-        let data = base64::decode(data).unwrap();
-        self.host
-            .data_ready_async(&uri, &data, Some(request_id as _));
-    }
-
     fn create(hwnd: &mut SciterHandle) {
         handle_message(
             hwnd.raw(),
             Message::Create {
                 backend: sciter::types::GFX_LAYER::SKIA_OPENGL,
-                transparent: false,
+                transparent: true,
             },
         );
     }
@@ -230,7 +222,7 @@ fn load_sciter() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct EventHandler(Rc<dyn SciterEvents>);
+struct EventHandler(Rc<dyn SciterCallbacks>);
 
 impl EventHandler {
     fn call_event(&self, name: String, data: String) {
@@ -244,20 +236,9 @@ impl sciter::EventHandler for EventHandler {
     }
 }
 
-struct HostHandler(Rc<dyn SciterEvents>);
+struct HostHandler(Rc<dyn SciterCallbacks>);
 
 impl sciter::HostHandler for HostHandler {
-    fn on_data_load(&mut self, pnm: &mut SCN_LOAD_DATA) -> Option<LOAD_RESULT> {
-        let uri = sciter::utf::w2s(pnm.uri);
-
-        return if !uri.starts_with("sciter:") {
-            self.0.on_load_resource(uri.clone(), pnm.request_id as u64);
-            Some(LOAD_RESULT::LOAD_DELAYED)
-        } else {
-            None
-        };
-    }
-
     fn on_graphics_critical_failure(&mut self) {
         println!("Critical graphics failure");
     }
@@ -276,10 +257,7 @@ impl sciter::HostHandler for HostHandler {
     }
 }
 
-pub trait SciterEvents {
+pub trait SciterCallbacks {
     fn on_redraw_required(&self);
     fn on_event(&self, name: String, data: String);
-    fn on_load_resource(&self, uri: String, request_id: u64);
 }
-
-include!(concat!(env!("OUT_DIR"), "/skiter.uniffi.rs"));
