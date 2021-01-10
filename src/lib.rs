@@ -3,13 +3,13 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 
-use sciter::dispatch_script_call;
 use sciter::host::{OUTPUT_SEVERITY, OUTPUT_SUBSYTEMS};
 use sciter::types::{LOAD_RESULT, POINT, SCN_INVALIDATE_RECT, SCN_LOAD_DATA, _HWINDOW};
 use sciter::windowless::{
     handle_message, Message, MouseEvent, PaintLayer, KEYBOARD_STATES, MOUSE_BUTTONS, MOUSE_EVENTS,
 };
 use sciter::Host;
+use sciter::{dispatch_script_call, GFX_LAYER};
 
 use anyhow::anyhow;
 
@@ -43,7 +43,7 @@ impl Sciter {
     pub fn new(width: u32, height: u32, hwnd: u64, callbacks: Box<dyn SciterEvents>) -> Sciter {
         let sciter = || -> Result<Sciter, &'static str> {
             if !SCITER_INITIALIZED.compare_and_swap(false, true, Ordering::Relaxed) {
-                load_sciter().or(Err("Couldn't load sciter native library"))?;
+                load_sciter().or(Err("Couldn't load sciter native library :("))?;
 
                 // Give sciter necessary privileges
                 sciter::set_options(sciter::RuntimeOptions::UxTheming(true)).unwrap();
@@ -67,7 +67,7 @@ impl Sciter {
                 host,
                 startup: Instant::now(),
             };
-            // sciter.resolution(100);
+            sciter.resolution(100);
             sciter.resize(width, height);
             Ok(sciter)
         }();
@@ -168,9 +168,7 @@ impl Sciter {
     }
 
     pub fn data_ready(&self, uri: String, request_id: u64, data: String) {
-        println!("went through");
         let data = base64::decode(data).unwrap();
-        println!("decoded");
         self.host
             .data_ready_async(&uri, &data, Some(request_id as _));
     }
@@ -180,7 +178,7 @@ impl Sciter {
             hwnd.raw(),
             Message::Create {
                 backend: sciter::types::GFX_LAYER::SKIA_OPENGL,
-                transparent: true,
+                transparent: false,
             },
         );
     }
