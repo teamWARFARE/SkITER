@@ -390,6 +390,7 @@ pub enum KeyboardStates {
     ControlKeyPressed,
     ShiftKeyPressed,
     AltKeyPressed,
+    None,
 }
 
 impl KeyboardStates {
@@ -398,6 +399,7 @@ impl KeyboardStates {
             KeyboardStates::ControlKeyPressed => KEYBOARD_STATES::CONTROL_KEY_PRESSED,
             KeyboardStates::ShiftKeyPressed => KEYBOARD_STATES::SHIFT_KEY_PRESSED,
             KeyboardStates::AltKeyPressed => KEYBOARD_STATES::ALT_KEY_PRESSED,
+            KeyboardStates::None => KEYBOARD_STATES::from(0),
         }
     }
 }

@@ -5,7 +5,8 @@ package army.warfare.skiter;
 public enum KeyboardStates {
     CONTROL_KEY_PRESSED(0),
     SHIFT_KEY_PRESSED(1),
-    ALT_KEY_PRESSED(2);
+    ALT_KEY_PRESSED(2),
+    NONE(3);
 
     private final int value;
     KeyboardStates(int value) {
@@ -17,6 +18,7 @@ public enum KeyboardStates {
             case 0: return CONTROL_KEY_PRESSED;
             case 1: return SHIFT_KEY_PRESSED;
             case 2: return ALT_KEY_PRESSED;
+            case 3: return NONE;
             default: throw new Error("Invalid value for enum KeyboardStates: " + x);
         }
     }

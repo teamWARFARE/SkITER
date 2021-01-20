@@ -67,6 +67,7 @@ foreign_enum!(
         CONTROL_KEY_PRESSED = KeyboardStates::ControlKeyPressed,
         SHIFT_KEY_PRESSED = KeyboardStates::ShiftKeyPressed,
         ALT_KEY_PRESSED = KeyboardStates::AltKeyPressed,
+        NONE = KeyboardStates::None,
     }
 );
 
