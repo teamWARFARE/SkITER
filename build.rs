@@ -16,7 +16,8 @@ fn main() {
             .join("skiter"),
         "army.warfare.skiter".into(),
     )))
-    .rustfmt_bindings(true);
+    .rustfmt_bindings(true)
+    .remove_not_generated_files_from_output_directory(true);
 
     swig_gen.expand("jni bindings", &in_src, &out_src);
     println!("cargo:rerun-if-changed={}", in_src.display());
