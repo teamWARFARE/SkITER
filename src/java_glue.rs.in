@@ -1,0 +1,142 @@
+use super::bindings::options::*;
+use super::bindings::library::*;
+use super::bindings::host::*;
+
+use jni_sys::*;
+
+foreign_class!(
+    class Library {
+        self_type Library;
+        private constructor = empty;
+        fn Library::bundled() -> Result<Library, &'static str>;
+        fn Library::path(path: &str) -> Library;
+        foreign_code "    static { System.loadLibrary(\"skiter\"); }\n";
+    }
+);
+
+foreign_enum!(
+    enum GfxLayer {
+        AUTO = GfxLayer::Auto,
+        CPU = GfxLayer::Cpu,
+        SKIA_CPU = GfxLayer::SkiaCpu,
+        SKIA_OPENGL = GfxLayer::SkiaOpenGl,
+    }
+);
+
+foreign_class!(
+    #[derive(camelCaseAliases)]
+    class Options {
+        fn Options::set_library(library: Library) -> Result<(), &'static str>;
+        fn Options::set_gfx_layer(gfx_layer: GfxLayer) -> Result<(), &'static str>;
+        fn Options::set_ux_theming(value: bool) -> Result<(), &'static str>;
+        fn Options::set_script_features(value: u8) -> Result<(), &'static str>;
+        fn Options::set_debug_mode(value: bool) -> Result<(), &'static str>;
+        fn Options::set_init_script(script: &str) -> Result<(), &'static str>;
+        fn Options::set_logical_pixels(value: bool) -> Result<(), &'static str>;
+    }
+);
+
+foreign_class!(
+    class PaintLayer {
+        self_type PaintLayer;
+        constructor PaintLayer::new(element: u64, is_foreground: bool) -> PaintLayer;
+    }
+);
+
+foreign_enum!(
+    enum MouseEvents {
+        MOUSE_MOVE = MouseEvents::MouseMove,
+        MOUSE_UP = MouseEvents::MouseUp,
+        MOUSE_DOWN = MouseEvents::MouseDown,
+        MOUSE_WHEEL = MouseEvents::MouseWheel,
+        MOUSE_CLICK = MouseEvents::MouseClick,
+    }
+);
+
+foreign_enum!(
+    enum MouseButtons {
+        LEFT = MouseButtons::Left,
+        RIGHT = MouseButtons::Right,
+        MIDDLE = MouseButtons::Middle,
+        NONE = MouseButtons::None,
+    }
+);
+
+foreign_enum!(
+    enum KeyboardStates {
+        CONTROL_KEY_PRESSED = KeyboardStates::ControlKeyPressed,
+        SHIFT_KEY_PRESSED = KeyboardStates::ShiftKeyPressed,
+        ALT_KEY_PRESSED = KeyboardStates::AltKeyPressed,
+    }
+);
+
+foreign_enum!(
+    enum KeyEvents {
+        KEY_DOWN = KeyEvents::KeyDown,
+        KEY_UP = KeyEvents::KeyUp,
+        KEY_CHAR = KeyEvents::KeyChar,
+    }
+);
+
+foreign_class!(
+    class Point {
+        self_type Point;
+        constructor Point::new(x: i32, y: i32) -> Point;
+    }
+);
+
+foreign_class!(
+    class Message {
+        self_type Message;
+        private constructor = empty;
+        fn Message::create(backend: GfxLayer, transparent: bool) -> Message;
+        fn Message::destroy() -> Message;
+        fn Message::size(width: u32, height: u32) -> Message;
+        fn Message::resolution(ppi: u32) -> Message;
+        fn Message::focus(enter: bool) -> Message;
+        fn Message::heartbit(milliseconds: u32) -> Message;
+        fn Message::redraw() -> Message;
+        fn Message::paint(layer: PaintLayer) -> Message;
+        fn Message::mouse(event: MouseEvents, button: MouseButtons, modifiers: KeyboardStates, pos: Point) -> Message;
+        fn Message::keyboard(event: KeyEvents, code: u32, modifiers: KeyboardStates) -> Message;
+    }
+);
+
+foreign_callback!(
+    callback DataLoadCallback {
+        self_type DataLoadCallback;
+        onDataLoad = DataLoadCallback::on_data_load(&self, uri: String, request_id: u64) -> i32;
+    }
+);
+
+foreign_callback!(
+    callback NativeFunctionInvocationCallback {
+        self_type NativeFunctionInvocationCallback;
+        onNativeFunctionInvocation = NativeFunctionInvocationCallback::on_native_function_invocation(&self, name: String, data: &[i8]) -> bool;
+    }
+);
+
+foreign_class!(
+    #[derive(camelCaseAliases)]
+    class Host {
+        self_type Host;
+        constructor Host::create(handle: u64, backend: GfxLayer, transparent: bool) -> Result<Host, &'static str>;
+        fn Host::dispatch_message(&self, message: Message);
+        fn Host::on_data_load(&self, data_load_callback: Box<dyn DataLoadCallback>);
+        fn Host::on_native_function_invocation(&self, native_function_invocation_callback: Box<dyn NativeFunctionInvocationCallback>);
+        fn Host::data_ready(&self, uri: String, request_id: u64, data: &[i8]);
+        fn Host::load_html(&mut self, html: String, uri: Option<&str>);
+        fn Host::load_file(&mut self, path: String);
+        fn Host::call_function(&mut self, name: String, data: &[i8]) -> Result<(), &'static str>;
+    }
+);
+
+foreign_class!(
+    class LoadResult {
+        foreign_code "    public static int IGNORED = -1;\n";
+        foreign_code "    public static int LOAD_DEFAULT = 0;\n";
+        foreign_code "    public static int LOAD_DISCARD = 1;\n";
+        foreign_code "    public static int LOAD_DELAYED = 2;\n";
+        foreign_code "    public static int LOAD_MYSELF = 3;\n";
+    }
+);

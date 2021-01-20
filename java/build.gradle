@@ -1,0 +1,16 @@
+plugins {
+    id("java")
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group = 'warfare.army'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
