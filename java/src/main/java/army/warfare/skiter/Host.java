@@ -26,6 +26,11 @@ public final class Host {
     }
     private static native void do_onDataLoad(long self, DataLoadCallback data_load_callback);
 
+    public final void registerBehavior(String name, DrawCallback draw_callback) {
+        do_registerBehavior(mNativeObj, name, draw_callback);
+    }
+    private static native void do_registerBehavior(long self, String name, DrawCallback draw_callback);
+
     public final void onNativeFunctionInvocation(NativeFunctionInvocationCallback native_function_invocation_callback) {
         do_onNativeFunctionInvocation(mNativeObj, native_function_invocation_callback);
     }

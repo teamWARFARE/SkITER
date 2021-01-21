@@ -1,7 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use sciter::types::{HWINDOW, LOAD_RESULT, POINT, SCN_LOAD_DATA};
+use sciter::dom::event::{DRAW_EVENTS, EVENT_GROUPS};
+use sciter::graphics::Graphics;
+use sciter::graphics::HGFX;
+use sciter::types::{HWINDOW, LOAD_RESULT, POINT, RECT, SCN_LOAD_DATA};
 use sciter::windowless::{
     handle_message, KeyboardEvent, Message as SciterMessage, MouseEvent,
     PaintLayer as SciterPaintLayer, KEYBOARD_STATES, KEY_EVENTS, MOUSE_BUTTONS, MOUSE_EVENTS,
@@ -64,6 +67,17 @@ impl Host {
             .borrow_mut()
             .data_load_callback
             .replace(data_load_callback);
+    }
+
+    pub fn register_behavior(&self, name: String, draw_callback: Box<dyn DrawCallback>) {
+        let draw_callback: Rc<dyn DrawCallback> = draw_callback.into();
+
+        self.host.register_behavior(&name, move || {
+            let draw_callback = draw_callback.clone();
+            Box::new(BehaviorEventHandler {
+                callback: draw_callback,
+            })
+        });
     }
 
     pub fn on_native_function_invocation(
@@ -257,6 +271,10 @@ pub trait DataLoadCallback {
     fn on_data_load(&self, uri: String, request_id: u64) -> i32;
 }
 
+pub trait DrawCallback {
+    fn on_draw(&self, area: Rect, layer: DrawEvents) -> bool;
+}
+
 pub trait NativeFunctionInvocationCallback {
     fn on_native_function_invocation(&self, name: String, data: &[i8]) -> bool;
 }
@@ -318,6 +336,25 @@ impl SciterEventHandler for EventHandlerWrapper {
             }
         }
         None
+    }
+}
+
+struct BehaviorEventHandler {
+    callback: Rc<dyn DrawCallback>,
+}
+
+impl SciterEventHandler for BehaviorEventHandler {
+    fn get_subscription(&mut self) -> Option<EVENT_GROUPS> {
+        return Some(EVENT_GROUPS::HANDLE_DRAW);
+    }
+
+    fn on_draw(&mut self, _root: HELEMENT, gfx: HGFX, area: &RECT, layer: DRAW_EVENTS) -> bool {
+        let area = Rect::from_sciter(area);
+        let layer = DrawEvents::from_sciter(layer);
+        let mut gfx = Graphics::from(gfx);
+        gfx.flush()
+            .expect("[SKITER] [ERROR] Couldn't flush graphics");
+        self.callback.on_draw(area, layer)
     }
 }
 
@@ -417,6 +454,66 @@ impl KeyEvents {
             KeyEvents::KeyDown => KEY_EVENTS::KEY_DOWN,
             KeyEvents::KeyUp => KEY_EVENTS::KEY_UP,
             KeyEvents::KeyChar => KEY_EVENTS::KEY_CHAR,
+        }
+    }
+}
+
+pub struct Rect {
+    left: i32,
+    top: i32,
+    right: i32,
+    bottom: i32,
+}
+
+impl Rect {
+    pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Rect {
+        Rect {
+            left,
+            top,
+            right,
+            bottom,
+        }
+    }
+
+    pub fn left(&self) -> i32 {
+        self.left
+    }
+    pub fn top(&self) -> i32 {
+        self.top
+    }
+    pub fn right(&self) -> i32 {
+        self.right
+    }
+    pub fn bottom(&self) -> i32 {
+        self.bottom
+    }
+}
+
+impl Rect {
+    fn from_sciter(rect: &RECT) -> Rect {
+        Rect {
+            left: rect.left,
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+        }
+    }
+}
+
+pub enum DrawEvents {
+    DrawBackground,
+    DrawContent,
+    DrawForeground,
+    DrawOutline,
+}
+
+impl DrawEvents {
+    fn from_sciter(rect: DRAW_EVENTS) -> DrawEvents {
+        match rect {
+            DRAW_EVENTS::DRAW_BACKGROUND => DrawEvents::DrawBackground,
+            DRAW_EVENTS::DRAW_CONTENT => DrawEvents::DrawContent,
+            DRAW_EVENTS::DRAW_FOREGROUND => DrawEvents::DrawForeground,
+            DRAW_EVENTS::DRAW_OUTLINE => DrawEvents::DrawOutline,
         }
     }
 }

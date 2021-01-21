@@ -79,10 +79,30 @@ foreign_enum!(
     }
 );
 
+foreign_enum!(
+    enum DrawEvents {
+        DRAW_BACKGROUND = DrawEvents::DrawBackground,
+        DRAW_CONTENT = DrawEvents::DrawContent,
+        DRAW_FOREGROUND = DrawEvents::DrawForeground,
+        DRAW_OUTLINE = DrawEvents::DrawOutline,
+    }
+);
+
 foreign_class!(
     class Point {
         self_type Point;
         constructor Point::new(x: i32, y: i32) -> Point;
+    }
+);
+
+foreign_class!(
+    class Rect {
+        self_type Rect;
+        constructor Rect::new(left: i32, top: i32, right: i32, bottom: i32) -> Rect;
+        fn Rect::left(&self) -> i32;
+        fn Rect::top(&self) -> i32;
+        fn Rect::right(&self) -> i32;
+        fn Rect::bottom(&self) -> i32;
     }
 );
 
@@ -111,6 +131,13 @@ foreign_callback!(
 );
 
 foreign_callback!(
+    callback DrawCallback {
+        self_type DrawCallback;
+        onDraw = DrawCallback::on_draw(&self, area: Rect, layer: DrawEvents) -> bool;
+    }
+);
+
+foreign_callback!(
     callback NativeFunctionInvocationCallback {
         self_type NativeFunctionInvocationCallback;
         onNativeFunctionInvocation = NativeFunctionInvocationCallback::on_native_function_invocation(&self, name: String, data: &[i8]) -> bool;
@@ -124,6 +151,7 @@ foreign_class!(
         constructor Host::create(handle: u64, backend: GfxLayer, transparent: bool) -> Result<Host, &'static str>;
         fn Host::dispatch_message(&self, message: Message);
         fn Host::on_data_load(&self, data_load_callback: Box<dyn DataLoadCallback>);
+        fn Host::register_behavior(&self, name: String, draw_callback: Box<dyn DrawCallback>);
         fn Host::on_native_function_invocation(&self, native_function_invocation_callback: Box<dyn NativeFunctionInvocationCallback>);
         fn Host::data_ready(&self, uri: String, request_id: u64, data: &[i8]);
         fn Host::load_html(&mut self, html: String, uri: Option<&str>);
