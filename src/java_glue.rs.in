@@ -53,15 +53,6 @@ foreign_enum!(
     }
 );
 
-foreign_enum!(
-    enum MouseButtons {
-        LEFT = MouseButtons::Left,
-        RIGHT = MouseButtons::Right,
-        MIDDLE = MouseButtons::Middle,
-        NONE = MouseButtons::None,
-    }
-);
-
 
 foreign_enum!(
     enum KeyEvents {
@@ -99,6 +90,16 @@ foreign_class!(
 );
 
 foreign_class!(
+    class MouseButtons {
+        foreign_code "    public static int NONE = 0;\n";
+        foreign_code "    public static int MAIN = 1;\n";
+        foreign_code "    public static int PROP = 2;\n";
+        foreign_code "    public static int MIDDLE = 3;\n";
+    }
+);
+
+
+foreign_class!(
     class Message {
         self_type Message;
         private constructor = empty;
@@ -110,7 +111,7 @@ foreign_class!(
         fn Message::heartbit(milliseconds: u32) -> Message;
         fn Message::redraw() -> Message;
         fn Message::paint(layer: PaintLayer) -> Message;
-        fn Message::mouse(event: MouseEvents, button: MouseButtons, modifiers: i32, pos: Point) -> Message;
+        fn Message::mouse(event: MouseEvents, button: i32, modifiers: i32, pos: Point) -> Message;
         fn Message::keyboard(event: KeyEvents, code: u32, modifiers: i32) -> Message;
     }
 );

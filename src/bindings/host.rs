@@ -7,7 +7,7 @@ use sciter::graphics::HGFX;
 use sciter::types::{HWINDOW, LOAD_RESULT, POINT, RECT, SCN_LOAD_DATA};
 use sciter::windowless::{
     handle_message, KeyboardEvent, Message as SciterMessage, MouseEvent,
-    PaintLayer as SciterPaintLayer, KEYBOARD_STATES, KEY_EVENTS, MOUSE_BUTTONS, MOUSE_EVENTS,
+    PaintLayer as SciterPaintLayer, KEYBOARD_STATES, KEY_EVENTS, MOUSE_EVENTS,
 };
 use sciter::{
     EventHandler as SciterEventHandler, Host as SciterHost, HostHandler as SciterHostHandler,
@@ -149,7 +149,7 @@ pub enum Message {
     },
     Mouse {
         event: MouseEvents,
-        button: MouseButtons,
+        button: i32,
         modifiers: i32,
         pos: Point,
     },
@@ -198,7 +198,7 @@ impl Message {
 
     //TODO: RenderTo (bitmap)
 
-    pub fn mouse(event: MouseEvents, button: MouseButtons, modifiers: i32, pos: Point) -> Message {
+    pub fn mouse(event: MouseEvents, button: i32, modifiers: i32, pos: Point) -> Message {
         Message::Mouse {
             event,
             button,
@@ -245,7 +245,7 @@ impl Message {
                 pos,
             } => SciterMessage::Mouse(MouseEvent {
                 event: event.to_sciter(),
-                button: button.to_sciter(),
+                button: unsafe { std::mem::transmute(*button) },
                 modifiers: KEYBOARD_STATES::from(*modifiers as u32),
                 pos: pos.to_sciter(),
             }),
@@ -426,25 +426,6 @@ impl MouseEvents {
             MouseEvents::MouseDown => MOUSE_EVENTS::MOUSE_DOWN,
             MouseEvents::MouseWheel => MOUSE_EVENTS::MOUSE_WHEEL,
             MouseEvents::MouseClick => MOUSE_EVENTS::MOUSE_CLICK,
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-pub enum MouseButtons {
-    Left,
-    Right,
-    Middle,
-    None,
-}
-
-impl MouseButtons {
-    fn to_sciter(&self) -> MOUSE_BUTTONS {
-        match self {
-            MouseButtons::Left => MOUSE_BUTTONS::MAIN,
-            MouseButtons::Right => MOUSE_BUTTONS::PROP,
-            MouseButtons::Middle => MOUSE_BUTTONS::MIDDLE,
-            MouseButtons::None => MOUSE_BUTTONS::NONE,
         }
     }
 }
