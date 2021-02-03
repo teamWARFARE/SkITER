@@ -2,24 +2,11 @@
 package army.warfare.skiter;
 
 
-public enum KeyboardStates {
-    CONTROL_KEY_PRESSED(0),
-    SHIFT_KEY_PRESSED(1),
-    ALT_KEY_PRESSED(2),
-    NONE(3);
+public final class KeyboardStates {
 
-    private final int value;
-    KeyboardStates(int value) {
-        this.value = value;
-    }
-    public final int getValue() { return value; }
-    /*package*/ static KeyboardStates fromInt(int x) {
-        switch (x) {
-            case 0: return CONTROL_KEY_PRESSED;
-            case 1: return SHIFT_KEY_PRESSED;
-            case 2: return ALT_KEY_PRESSED;
-            case 3: return NONE;
-            default: throw new Error("Invalid value for enum KeyboardStates: " + x);
-        }
-    }
+    private KeyboardStates() {}
+    public static int NONE_DOWN = 0;
+    public static int CTRL_DOWN = 0x01;
+    public static int SHIFT_DOWN = 0x02;
+    public static int ALT_DOWN = 0x04;
 }

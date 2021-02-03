@@ -150,13 +150,13 @@ pub enum Message {
     Mouse {
         event: MouseEvents,
         button: MouseButtons,
-        modifiers: KeyboardStates,
+        modifiers: i32,
         pos: Point,
     },
     Keyboard {
         event: KeyEvents,
         code: u32,
-        modifiers: KeyboardStates,
+        modifiers: i32,
     },
 }
 
@@ -198,12 +198,7 @@ impl Message {
 
     //TODO: RenderTo (bitmap)
 
-    pub fn mouse(
-        event: MouseEvents,
-        button: MouseButtons,
-        modifiers: KeyboardStates,
-        pos: Point,
-    ) -> Message {
+    pub fn mouse(event: MouseEvents, button: MouseButtons, modifiers: i32, pos: Point) -> Message {
         Message::Mouse {
             event,
             button,
@@ -212,7 +207,7 @@ impl Message {
         }
     }
 
-    pub fn keyboard(event: KeyEvents, code: u32, modifiers: KeyboardStates) -> Message {
+    pub fn keyboard(event: KeyEvents, code: u32, modifiers: i32) -> Message {
         Message::Keyboard {
             event,
             code,
@@ -251,7 +246,7 @@ impl Message {
             } => SciterMessage::Mouse(MouseEvent {
                 event: event.to_sciter(),
                 button: button.to_sciter(),
-                modifiers: modifiers.to_sciter(),
+                modifiers: KEYBOARD_STATES::from(*modifiers as u32),
                 pos: pos.to_sciter(),
             }),
             Message::Keyboard {
@@ -261,7 +256,7 @@ impl Message {
             } => SciterMessage::Keyboard(KeyboardEvent {
                 event: event.to_sciter(),
                 code: *code,
-                modifiers: modifiers.to_sciter(),
+                modifiers: KEYBOARD_STATES::from(*modifiers as u32),
             }),
         }
     }
@@ -276,7 +271,12 @@ pub trait DrawCallback {
 }
 
 pub trait NativeFunctionInvocationCallback {
-    fn on_native_function_invocation(&self, name: String, data: &[i8]) -> bool;
+    fn on_native_function_invocation(
+        &self,
+        name: String,
+        data: &[i8],
+        return_value: ByteArrayFuture,
+    ) -> bool;
 }
 
 struct Callbacks {
@@ -325,8 +325,22 @@ impl SciterEventHandler for EventHandlerWrapper {
                 let data = serde_cbor::to_vec(&cbor);
                 if let Ok(data) = data {
                     let data = unsafe { &*(data.as_slice() as *const _ as *const [i8]) };
-                    if callback.on_native_function_invocation(name.to_owned(), data) {
-                        return Some(SciterValue::from(()));
+
+                    let future = ByteArrayFuture::new();
+                    let handle = future.handle();
+
+                    if callback.on_native_function_invocation(name.to_owned(), data, future) {
+                        let data = handle
+                            .replace(None)
+                            .expect("[SKITER] [ERROR] Future did not contain any data");
+
+                        let return_value = sciter_serde::to_value(
+                            &serde_cbor::from_slice::<CborValue>(&data)
+                                .expect("[SKITER] [ERROR] Couldn't deserialize cbor value"),
+                        )
+                        .expect("[SKITER] [ERROR] Couldn't convert cbor value to sciter value");
+
+                        return Some(return_value);
                     }
                 } else {
                     println!("[SKITER] [ERROR] Couldn't serialize cbor value");
@@ -418,25 +432,6 @@ impl MouseButtons {
             MouseButtons::Right => MOUSE_BUTTONS::PROP,
             MouseButtons::Middle => MOUSE_BUTTONS::MIDDLE,
             MouseButtons::None => MOUSE_BUTTONS::NONE,
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-pub enum KeyboardStates {
-    ControlKeyPressed,
-    ShiftKeyPressed,
-    AltKeyPressed,
-    None,
-}
-
-impl KeyboardStates {
-    fn to_sciter(&self) -> KEYBOARD_STATES {
-        match self {
-            KeyboardStates::ControlKeyPressed => KEYBOARD_STATES::CONTROL_KEY_PRESSED,
-            KeyboardStates::ShiftKeyPressed => KEYBOARD_STATES::SHIFT_KEY_PRESSED,
-            KeyboardStates::AltKeyPressed => KEYBOARD_STATES::ALT_KEY_PRESSED,
-            KeyboardStates::None => KEYBOARD_STATES::from(0),
         }
     }
 }
@@ -536,5 +531,27 @@ impl Point {
             x: self.x,
             y: self.y,
         }
+    }
+}
+
+pub struct ByteArrayFuture {
+    data: Rc<RefCell<Option<Vec<u8>>>>,
+}
+
+impl ByteArrayFuture {
+    fn new() -> ByteArrayFuture {
+        ByteArrayFuture {
+            data: Rc::new(RefCell::new(None)),
+        }
+    }
+
+    fn handle(&self) -> Rc<RefCell<Option<Vec<u8>>>> {
+        self.data.clone()
+    }
+
+    pub fn complete(&self, data: &[i8]) {
+        let data = unsafe { &*(data as *const _ as *const [u8]) };
+        let data = data.to_vec();
+        self.data.replace(Some(data));
     }
 }

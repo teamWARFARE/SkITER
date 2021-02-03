@@ -5,6 +5,6 @@ package army.warfare.skiter;
 public interface NativeFunctionInvocationCallback {
 
 
-    boolean onNativeFunctionInvocation(String name, byte [] data);
+    boolean onNativeFunctionInvocation(String name, byte [] data, ByteArrayFuture return_data);
 
 }

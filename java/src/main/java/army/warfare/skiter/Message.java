@@ -78,26 +78,26 @@ public final class Message {
     }
     private static native long do_paint(long layer);
 
-    public static Message mouse(MouseEvents event, MouseButtons button, KeyboardStates modifiers, Point pos) {
-        int a0 = event.getValue();        int a1 = button.getValue();        int a2 = modifiers.getValue();
+    public static Message mouse(MouseEvents event, MouseButtons button, int modifiers, Point pos) {
+        int a0 = event.getValue();        int a1 = button.getValue();
         long a3 = pos.mNativeObj;
         pos.mNativeObj = 0;
 
-        long ret = do_mouse(a0, a1, a2, a3);
+        long ret = do_mouse(a0, a1, modifiers, a3);
         Message convRet = new Message(InternalPointerMarker.RAW_PTR, ret);
 
-        JNIReachabilityFence.reachabilityFence4(event, button, modifiers, pos);
+        JNIReachabilityFence.reachabilityFence3(event, button, pos);
 
         return convRet;
     }
     private static native long do_mouse(int event, int button, int modifiers, long pos);
 
-    public static Message keyboard(KeyEvents event, long code, KeyboardStates modifiers) {
-        int a0 = event.getValue();        int a2 = modifiers.getValue();
-        long ret = do_keyboard(a0, code, a2);
+    public static Message keyboard(KeyEvents event, long code, int modifiers) {
+        int a0 = event.getValue();
+        long ret = do_keyboard(a0, code, modifiers);
         Message convRet = new Message(InternalPointerMarker.RAW_PTR, ret);
 
-        JNIReachabilityFence.reachabilityFence2(event, modifiers);
+        JNIReachabilityFence.reachabilityFence1(event);
 
         return convRet;
     }

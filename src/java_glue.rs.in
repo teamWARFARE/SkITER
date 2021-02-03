@@ -62,14 +62,6 @@ foreign_enum!(
     }
 );
 
-foreign_enum!(
-    enum KeyboardStates {
-        CONTROL_KEY_PRESSED = KeyboardStates::ControlKeyPressed,
-        SHIFT_KEY_PRESSED = KeyboardStates::ShiftKeyPressed,
-        ALT_KEY_PRESSED = KeyboardStates::AltKeyPressed,
-        NONE = KeyboardStates::None,
-    }
-);
 
 foreign_enum!(
     enum KeyEvents {
@@ -118,8 +110,8 @@ foreign_class!(
         fn Message::heartbit(milliseconds: u32) -> Message;
         fn Message::redraw() -> Message;
         fn Message::paint(layer: PaintLayer) -> Message;
-        fn Message::mouse(event: MouseEvents, button: MouseButtons, modifiers: KeyboardStates, pos: Point) -> Message;
-        fn Message::keyboard(event: KeyEvents, code: u32, modifiers: KeyboardStates) -> Message;
+        fn Message::mouse(event: MouseEvents, button: MouseButtons, modifiers: i32, pos: Point) -> Message;
+        fn Message::keyboard(event: KeyEvents, code: u32, modifiers: i32) -> Message;
     }
 );
 
@@ -137,10 +129,18 @@ foreign_callback!(
     }
 );
 
+foreign_class!(
+    class ByteArrayFuture {
+        self_type ByteArrayFuture;
+        private constructor = empty;
+        fn ByteArrayFuture::complete(&self, data: &[i8]);
+    }
+);
+
 foreign_callback!(
     callback NativeFunctionInvocationCallback {
         self_type NativeFunctionInvocationCallback;
-        onNativeFunctionInvocation = NativeFunctionInvocationCallback::on_native_function_invocation(&self, name: String, data: &[i8]) -> bool;
+        onNativeFunctionInvocation = NativeFunctionInvocationCallback::on_native_function_invocation(&self, name: String, data: &[i8], return_data: ByteArrayFuture) -> bool;
     }
 );
 
@@ -167,5 +167,14 @@ foreign_class!(
         foreign_code "    public static int LOAD_DISCARD = 1;\n";
         foreign_code "    public static int LOAD_DELAYED = 2;\n";
         foreign_code "    public static int LOAD_MYSELF = 3;\n";
+    }
+);
+
+foreign_class!(
+    class KeyboardStates {
+        foreign_code "    public static int NONE_DOWN = 0;\n";
+        foreign_code "    public static int CTRL_DOWN = 0x01;\n";
+        foreign_code "    public static int SHIFT_DOWN = 0x02;\n";
+        foreign_code "    public static int ALT_DOWN = 0x04;\n";
     }
 );

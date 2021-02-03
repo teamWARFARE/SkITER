@@ -17,6 +17,11 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/zstd-safe-beb5513eb2c107b0/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/zstd-sys-57f90e7a962ea257/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde-1f5a15953109a571/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/anyhow-e29f1f3042f00b1b/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/getrandom-4b0625e8c37df49d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/glx-b1dabc60942f7d44/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/khronos_api-d19e1822b0aed0a3/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/x11-237e7599ccea21da/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
