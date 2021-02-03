@@ -115,10 +115,18 @@ foreign_class!(
     }
 );
 
+foreign_class!(
+    class ByteArrayFuture {
+        self_type ByteArrayFuture;
+        private constructor = empty;
+        fn ByteArrayFuture::complete(&self, data: &[i8]);
+    }
+);
+
 foreign_callback!(
     callback DataLoadCallback {
         self_type DataLoadCallback;
-        onDataLoad = DataLoadCallback::on_data_load(&self, uri: String, request_id: u64) -> i32;
+        onDataLoad = DataLoadCallback::on_data_load(&self, uri: String, request_id: u64, return_data: ByteArrayFuture) -> i32;
     }
 );
 
@@ -126,14 +134,6 @@ foreign_callback!(
     callback DrawCallback {
         self_type DrawCallback;
         onDraw = DrawCallback::on_draw(&self, area: Rect, layer: DrawEvents) -> bool;
-    }
-);
-
-foreign_class!(
-    class ByteArrayFuture {
-        self_type ByteArrayFuture;
-        private constructor = empty;
-        fn ByteArrayFuture::complete(&self, data: &[i8]);
     }
 );
 

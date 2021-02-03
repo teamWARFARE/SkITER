@@ -5,6 +5,6 @@ package army.warfare.skiter;
 public interface DataLoadCallback {
 
 
-    int onDataLoad(String uri, long request_id);
+    int onDataLoad(String uri, long request_id, ByteArrayFuture return_data);
 
 }

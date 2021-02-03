@@ -263,7 +263,7 @@ impl Message {
 }
 
 pub trait DataLoadCallback {
-    fn on_data_load(&self, uri: String, request_id: u64) -> i32;
+    fn on_data_load(&self, uri: String, request_id: u64, return_value: ByteArrayFuture) -> i32;
 }
 
 pub trait DrawCallback {
@@ -294,14 +294,27 @@ impl SciterHostHandler for HostHandlerWrapper {
             let uri = sciter::utf::w2s(pnm.uri);
             let request_id = pnm.request_id as u64;
 
-            match callback.on_data_load(uri, request_id) {
+            let future = ByteArrayFuture::new();
+            let handle = future.handle();
+
+            let result = match callback.on_data_load(uri.clone(), request_id, future) {
                 -1 => None,
                 0 => Some(LOAD_RESULT::LOAD_DEFAULT),
                 1 => Some(LOAD_RESULT::LOAD_DISCARD),
                 2 => Some(LOAD_RESULT::LOAD_DELAYED),
                 3 => Some(LOAD_RESULT::LOAD_MYSELF),
                 _ => panic!("Invalid LOAD_RESULT"),
+            };
+
+            let data = handle
+                .replace(None)
+                .expect("[SKITER] [ERROR] Future did not contain any data");
+
+            if data.len() > 0 {
+                self.data_ready(pnm.hwnd, &uri, &data, None);
             }
+
+            result
         } else {
             None
         }
