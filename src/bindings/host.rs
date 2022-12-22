@@ -319,6 +319,15 @@ impl SciterHostHandler for HostHandlerWrapper {
             None
         }
     }
+
+    fn on_debug_output(
+        &mut self,
+        _subsystem: sciter::host::OUTPUT_SUBSYTEMS,
+        _severity: sciter::host::OUTPUT_SEVERITY,
+        message: &str,
+    ) {
+        println!("{}", message);
+    }
 }
 
 struct EventHandlerWrapper {
@@ -326,6 +335,10 @@ struct EventHandlerWrapper {
 }
 
 impl SciterEventHandler for EventHandlerWrapper {
+	fn get_subscription(&mut self) -> Option<sciter::dom::event::EVENT_GROUPS> {
+    	Some(sciter::dom::event::default_events() | sciter::dom::event::EVENT_GROUPS::HANDLE_METHOD_CALL)
+    }
+
     fn on_script_call(
         &mut self,
         _root: HELEMENT,

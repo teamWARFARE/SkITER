@@ -17,8 +17,8 @@ panic = "abort"
 strip = "symbols"
 
 [dependencies]
-sciter-rs = { version = "0.5.54", features = ["dynamic", "windowless"] }
-sciter-serde = "0.3.2"
+sciter-rs = { git = "https://github.com/teamWARFARE/rust-sciter", features = ["dynamic", "windowless"] }
+sciter-serde = { git = "https://github.com/teamWARFARE/rust-sciter" }
 serde = { version = "1.0" }
 serde_cbor = "0.11.1"
 anyhow = "1.0.37"
@@ -31,3 +31,6 @@ log-panics = "2.0"
 
 [build-dependencies]
 flapigen = { git = "https://github.com/Dushistov/flapigen-rs" }
+
+[patch.crates-io]
+sciter-rs = { git = "https://github.com/teamWARFARE/rust-sciter" }

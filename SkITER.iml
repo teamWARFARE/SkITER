@@ -22,6 +22,20 @@
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/glx-b1dabc60942f7d44/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/khronos_api-d19e1822b0aed0a3/out" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/target/debug/build/x11-237e7599ccea21da/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/anyhow-cb66793a46cd3d37/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/bitflags-96817e0194920117/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/flapigen-87fbe35ad0d5cb4a/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/getrandom-27386749e4bdf297/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/indexmap-cd3216744a4455db/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/libc-28d909ee4e13ba9d/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/log-5ffa65fa92b4ed67/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/proc-macro2-279c5fa3875ff75e/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/serde-005f2a48e15c788a/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/skiter-ca585acaafab3a2e/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/syn-165f2fb14cb001de/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/winapi-b7a186a98a005f15/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/zstd-safe-038edc501e8dac17/out" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/debug/build/zstd-sys-c9e55930bd114e4d/out" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
