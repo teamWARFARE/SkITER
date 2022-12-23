@@ -5,6 +5,26 @@ use super::bindings::host::*;
 use jni_sys::*;
 
 foreign_class!(
+    class SkiterNatives {
+        foreign_code r#"
+        public static void extractNatives(String dir) {
+            String outputPath = new java.io.File(dir, "skiter.dll").getAbsolutePath();
+            java.io.InputStream inputStream = SkiterNatives.class.getClassLoader().getResourceAsStream("skiter.dll");
+            try (java.io.BufferedInputStream bis = new java.io.BufferedInputStream(inputStream); java.io.FileOutputStream fos = new java.io.FileOutputStream(outputPath)) {
+                byte[] buffer = new byte[4096];
+                int read;
+                while ((read = bis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, read);
+                }
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+            }
+        }
+        "#;
+    }
+);
+
+foreign_class!(
     class Library {
         self_type Library;
         private constructor = empty;
